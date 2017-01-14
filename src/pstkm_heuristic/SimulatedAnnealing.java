@@ -8,12 +8,15 @@ package pstkm_heuristic;
 import java.util.List;
 import java.util.Random;
 import java.util.Map;
+import java.util.stream.IntStream;
 import pl.edu.pojo.*;
 
 public class SimulatedAnnealing {
     
     private HeuristicInput input;
     private Map<Demand, List<PathWithEgdes>> map;
+    private Map<Demand, List<List<Integer>>> pathsConfig;
+    
     private double temperature;
     private double stopTemp;
     private double coolingRate;
@@ -57,9 +60,14 @@ public class SimulatedAnnealing {
             {
                 int idx = rand.nextInt(Config.PATHS);
                 PathWithEgdes path = mapCopy.get(d).get(idx);
+                
+                
+                
                 System.out.println("Demand: " + d.getValue() + ", path id: " + path.getIndex());
+                
                 for (Edge e : path.getEdges()) //solution without disaggregation
                     e.setLoad(e.getCurrentLoad() + d.getValue());
+                
             }
             temperature = temperature * coolingRate;
             iterations += 1;
@@ -97,7 +105,19 @@ public class SimulatedAnnealing {
         return input.getNetworkModules();
     }
     
-    
+    public void PathConfigurations(int maxDisaggregation)
+    {
+        if (maxDisaggregation > 0)
+        {
+            for (Demand d : map.keySet())
+            {
+                int pathsCount = map.get(d).size();
+                int[] indexes = IntStream.range(1, pathsCount).toArray();
+                
+            }
+        }
+        
+    }
             
     
     

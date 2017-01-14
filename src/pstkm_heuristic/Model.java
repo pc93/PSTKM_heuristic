@@ -10,7 +10,7 @@ import java.util.Map;
 import pl.edu.pojo.Demand;
 import pl.edu.pojo.Edge;
 import pl.edu.pojo.PathWithEgdes;
-import pl.edu.pojo.HeurisitcInput;
+import pl.edu.pojo.HeuristicInput;
 
 /**
  *
@@ -23,7 +23,7 @@ public class Model {
 	private int[] initalLoad;
 	private int[][][] delta_edp;
         
-        public void createModel(HeurisitcInput heuristicInput, int numberOfPaths) {
+        public void createModel(HeuristicInput heuristicInput, int numberOfPaths) {
 
 		try {
 			Map<Demand, List<PathWithEgdes>> demandPathsMap = heuristicInput

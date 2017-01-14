@@ -35,8 +35,8 @@ public class PathWithEgdes {
             int minFree = Config.MODULARITY;
             for (Edge e : this.edges)
             {
-                int x = (int)(Math.ceil(e.getCurrentLoad() % Config.MODULARITY)) * Config.MODULARITY - e.getCurrentLoad();
-                if (x < minFree)
+                int x = (int)(Math.ceil((double)e.getCurrentLoad() / Config.MODULARITY)) * Config.MODULARITY - e.getCurrentLoad();
+                if (x < minFree && x >=0)
                     minFree = x;
             }
             return minFree;

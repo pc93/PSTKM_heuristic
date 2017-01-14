@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import pl.edu.pojo.HeurisitcInput;
+import pl.edu.pojo.HeuristicInput;
 import pl.edu.pojo.Demand;
 import pl.edu.pojo.Edge;
 import pl.edu.pojo.PathWithEgdes;
@@ -21,12 +21,12 @@ import edu.asu.emit.algorithm.utils.Pair;
 
 public class Parser {
 
-	public static HeurisitcInput parse(String graphFileName,
+	public static HeuristicInput parse(String graphFileName,
 			String demandsFileName, int numberOfPaths) {
 
 		Map<Demand, List<PathWithEgdes>> map = new HashMap<Demand, List<PathWithEgdes>>();
 		List<Demand> demands = new ArrayList<Demand>();
-		HeurisitcInput heurisitcInput = new HeurisitcInput();
+		HeuristicInput heurisitcInput = new HeuristicInput();
 		// get demands
 		try {
 			// 1. read the file and put the content in the buffer

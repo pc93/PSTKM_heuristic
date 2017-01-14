@@ -8,15 +8,20 @@ package pl.edu.pojo;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- * @author Czarnocki
- */
-public class HeurisitcInput {
+public class HeuristicInput {
         private Map<Demand, List<PathWithEgdes>> demandPathsMap; // map demands : list of paths that realizes this demand
 	private List<Edge> edges; // all edges in graph
 	
+        public HeuristicInput()
+        {
+            
+        }
         
+        public HeuristicInput(List<Edge> edges, Map<Demand, List<PathWithEgdes>> demandPathsMap)
+        {
+            this.demandPathsMap = demandPathsMap;
+            this.edges = edges;
+        }
         
 	public Map<Demand, List<PathWithEgdes>> getDemandPathsMap() {
 		return demandPathsMap;
@@ -41,6 +46,15 @@ public class HeurisitcInput {
 		}
 		return null;
 	}
+        
+        public int getNetworkModules()
+        {
+            int modules = 0;
+            for (Edge e : edges)
+                modules += (int)(Math.ceil((double)e.getCurrentLoad() / Config.MODULARITY));
+            return modules;
+        }
+        
 	@Override
 	public String toString() {
 		return "HeuristicIput [demandPathsMap=" + demandPathsMap + ",\n-- edges="

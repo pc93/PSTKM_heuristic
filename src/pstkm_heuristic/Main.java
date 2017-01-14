@@ -5,7 +5,8 @@
  */
 package pstkm_heuristic;
 
-import pl.edu.pojo.HeurisitcInput;
+import pl.edu.pojo.HeuristicInput;
+import pl.edu.pojo.Config;
 
 /**
  *
@@ -17,14 +18,20 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Model model = new Model();
-        int numberOfPaths = 2;
-		                
-        HeurisitcInput input = null;
         
-        input = Parser.parse("resources/trivial.txt", "resources/demands_trivial.txt", numberOfPaths);
+        Model model = new Model();
+		                
+        HeuristicInput input = null;
+        
+        input = Parser.parse("resources/non-trivial_1.txt", "resources/demands_nontrivial1.txt", Config.PATHS);
+        //input = Parser.parse("resources/trivial.txt", "resources/demands_trivial.txt", numberOfPaths);
         
         System.out.println(input.toString());
+        
+        System.out.println("Network modules: " + input.getNetworkModules());
+        
+        SimulatedAnnealing sa = new SimulatedAnnealing(input, 1000, 1, 0.1);
+        sa.findSolution();
         //model.createModel(input, numberOfPaths);
     }
     

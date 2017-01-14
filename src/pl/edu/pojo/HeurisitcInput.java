@@ -43,7 +43,7 @@ public class HeurisitcInput {
 	}
 	@Override
 	public String toString() {
-		return "HeuristicIput [demandPathsMap=" + demandPathsMap + ", edges="
+		return "HeuristicIput [demandPathsMap=" + demandPathsMap + ",\n-- edges="
 				+ edges + "]";
 	}
 }

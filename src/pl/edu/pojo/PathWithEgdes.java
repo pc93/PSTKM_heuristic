@@ -12,7 +12,7 @@ public class PathWithEgdes {
 		super();
 		this.index = index;
 		this.edges = edges;
-                this.minFreeLoad = setMaxFreeLoad();
+                this.minFreeLoad = 10;
 	}
 
 	public int getIndex() {
@@ -30,21 +30,21 @@ public class PathWithEgdes {
 	public void setEdges(List<Edge> edges) {
 		this.edges = edges;
 	}
-        public int setMaxFreeLoad()
+        public int setMinFreeLoad()
         {
-            int maxFree = Config.MODULARITY;
+            int minFree = Config.MODULARITY;
             for (Edge e : this.edges)
             {
                 int x = (int)(Math.ceil(e.getCurrentLoad() % Config.MODULARITY)) * Config.MODULARITY - e.getCurrentLoad();
-                if (x < maxFree)
-                    maxFree = x;
+                if (x < minFree)
+                    minFree = x;
             }
-            return maxFree;
+            return minFree;
         }
 
 	@Override
 	public String toString() {
-		return "\n-- PathWithEgdes [index=" + index + ", edges=" + edges + "]";
+		return "\n-- PathWithEgdes [index=" + index + ", freeLoad=" + minFreeLoad + ", edges=" + edges + "]";
 	}
 	
 	

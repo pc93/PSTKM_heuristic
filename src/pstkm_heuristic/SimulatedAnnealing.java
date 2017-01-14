@@ -5,10 +5,7 @@
  */
 package pstkm_heuristic;
 
-/**
- *
- * @author Czarnocki
- */
+
 public class SimulatedAnnealing {
     
     

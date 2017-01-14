@@ -12,7 +12,7 @@ public class PathWithEgdes {
 		super();
 		this.index = index;
 		this.edges = edges;
-                this.minFreeLoad = 10;
+                this.minFreeLoad = setMinFreeLoad();
 	}
 
 	public int getIndex() {

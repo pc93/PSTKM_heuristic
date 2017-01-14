@@ -34,15 +34,55 @@ public class SimulatedAnnealing {
     {
         System.out.println("\nInit state: " + input.getNetworkModules());
         
-        HeuristicInput inputCopy = new HeuristicInput(input.getEdges(), input.getDemandPathsMap());
+        HeuristicInput inputCopy = Parser.parse("resources/non-trivial_1.txt", "resources/demands_nontrivial1.txt", Config.PATHS);
         Map<Demand, List<PathWithEgdes>> mapCopy = inputCopy.getDemandPathsMap();
         //Greedy solution, start point
-        for (Demand d : mapCopy.keySet())
+        int greedySolution = getGreedySolution(inputCopy); //distance
+        System.out.println("Greedy Solution: " + greedySolution + "\n");
+        System.out.println("Init modules: " + input.getNetworkModules());
+        
+        double deltaDistance = 0;
+        
+
+        //Simulated Annealing solution
+        int iterations = 0;
+        int bestSolution = 10000000;
+        while (temperature > stopTemp)
+        {
+            inputCopy = Parser.parse("resources/non-trivial_1.txt", "resources/demands_nontrivial1.txt", Config.PATHS); //code it to not do it like that but like below
+            //inputCopy = new HeuristicInput(input.getEdges(), input.getDemandPathsMap()); //inputCopy should be a network before demands were realized, but each iteration increase it
+            System.out.println(inputCopy.getNetworkModules()); 
+            mapCopy = inputCopy.getDemandPathsMap();
+            for (Demand d : mapCopy.keySet())
+            {
+                int idx = rand.nextInt(Config.PATHS);
+                PathWithEgdes path = mapCopy.get(d).get(idx);
+                System.out.println("Demand: " + d.getValue() + ", path id: " + path.getIndex());
+                for (Edge e : path.getEdges()) //solution without disaggregation
+                    e.setLoad(e.getCurrentLoad() + d.getValue());
+            }
+            temperature = temperature * coolingRate;
+            iterations += 1;
+            
+            System.out.println(iterations + ": Random local solution: " + inputCopy.getNetworkModules() + "\n");
+            if (inputCopy.getNetworkModules() < bestSolution)
+                bestSolution = inputCopy.getNetworkModules();
+        }
+        System.out.println("\niterations: " + iterations);
+        System.out.println("Best solution: " + bestSolution);
+        
+    }
+    
+    
+    public int  getGreedySolution(HeuristicInput input)
+    {
+        Map<Demand, List<PathWithEgdes>> map = input.getDemandPathsMap();
+        for (Demand d : map.keySet())
         {
             //get shortest path for demand
             PathWithEgdes shortest = null;
             int min = 1000;
-            for (PathWithEgdes path : mapCopy.get(d))
+            for (PathWithEgdes path : map.get(d))
             {
                 if (min >= path.getEdges().size())
                 {
@@ -53,33 +93,8 @@ public class SimulatedAnnealing {
             for (Edge e : shortest.getEdges())
                 e.setLoad(e.getCurrentLoad() + d.getValue());
         }
-        System.out.println("Greedy Solution: " + inputCopy.getNetworkModules());
-        //Simulated Annealing solution
-        int iterations = 0;
-        int bestSolution = 10000000;
-        while (temperature > stopTemp)
-        {
-            inputCopy = new HeuristicInput(input.getEdges(), input.getDemandPathsMap());
-            mapCopy = inputCopy.getDemandPathsMap();
-            for (Demand d : mapCopy.keySet())
-            {
-                int idx = rand.nextInt(Config.PATHS-1);
-                PathWithEgdes path = mapCopy.get(d).get(idx);
-                for (Edge e : path.getEdges()) //solution without disaggregation
-                {
-                    e.setLoad(e.getCurrentLoad() + d.getValue());
-                }
-            }
-            temperature = temperature * coolingRate;
-            iterations += 1;
-            System.out.println(iterations + ": Random local solution: " + inputCopy.getNetworkModules());
-            if (inputCopy.getNetworkModules() < bestSolution)
-                bestSolution = inputCopy.getNetworkModules();
-        }
-        System.out.println("\niterations: " + iterations);
-        System.out.println("Best solution: " + bestSolution);
         
-        
+        return input.getNetworkModules();
     }
     
     

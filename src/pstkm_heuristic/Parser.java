@@ -49,7 +49,7 @@ public class Parser {
 		}
 		// load graph
 		Graph graph = new Graph(graphFileName);
-		System.out.println("\nVertices: " + graph.getVertexList());
+		//System.out.println("\nVertices: " + graph.getVertexList());
 
 		// get intial loads and fill list of edges
 		Map<Pair<Integer, Integer>, Integer> edgesMap = graph.getEdges();
@@ -79,9 +79,9 @@ public class Parser {
 			List<Path> shortest_paths_list = yenAlg.getShortestPaths(
 					graph.getVertex(d.getSrcNode()),
 					graph.getVertex(d.getDstNode()), numberOfPaths);
-			System.out.println("\nSource node: " + d.getSrcNode()
-					+ ", destination node: " + d.getDstNode());
-			System.out.println("Shortest paths:" + shortest_paths_list);
+			//System.out.println("\nSource node: " + d.getSrcNode()
+			//		+ ", destination node: " + d.getDstNode());
+			//System.out.println("Shortest paths:" + shortest_paths_list);
 
 			List<PathWithEgdes> paths = new ArrayList<PathWithEgdes>();
 			int index = 1;

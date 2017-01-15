@@ -33,7 +33,7 @@ public class SimulatedAnnealing {
 		this.coolingRate = coolingRate;
 	}
 
-	public void findSolution() {
+	public void findSolution(String graphPath, String demandsPath) {
 		
 		System.out.println("Init modules: " + input.getNetworkModules());
 		int bestSolution = 1000;
@@ -44,7 +44,7 @@ public class SimulatedAnnealing {
 		int iterations = 0;
 		Result result = null;
 		while (temperature > stopTemp) {
-			input = Parser.parse("resources/non-trivial_1.txt", "resources/demands_nontrivial1.txt", Config.PATHS);
+			input = Parser.parse(graphPath, demandsPath, Config.PATHS);
 			result = new Result(input.getNetworkModules());
 			Map<Demand, List<PathWithEgdes>> mapCopy = input
 					.getDemandPathsMap();

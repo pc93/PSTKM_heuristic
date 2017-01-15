@@ -57,19 +57,90 @@ public class SimulatedAnnealing {
         {
             inputCopy = Parser.parse("resources/non-trivial_1.txt", "resources/demands_nontrivial1.txt", Config.PATHS); //code it to not do it like that but like below
             //inputCopy = new HeuristicInput(input.getEdges(), input.getDemandPathsMap()); //inputCopy should be a network before demands were realized, but each iteration increase it
-            System.out.println(inputCopy.getNetworkModules()); 
+            System.out.println(inputCopy.getNetworkModules());
             mapCopy = inputCopy.getDemandPathsMap();
             for (Demand d : mapCopy.keySet())
             {
-                int idx = rand.nextInt(Config.PATHS);
-                PathWithEgdes path = mapCopy.get(d).get(idx);
+                /*
+                //get config for demand d
+                PathsConfiguration config = null;
+                for (PathsConfiguration x : pathsConfigs)
+                    if (x.getDemand().getId() == d.getId())
+                        config = x;
                 
+                //get random index of config.demandPathsCombinations list
+                int range = config.getDemandPathsCombinations().size() - 1; //10-1 range:[0-9]
+                int idx = rand.nextInt(range); //10-1 [range: 0-9]
+                System.out.println("range: " + range + "  idx: " + idx);
+                List<Integer> combination = config.getDemandPathsCombinations().get(idx);
+                System.out.println("Choosen combination: " + combination.toString());
                 
-                
-                System.out.println("Demand: " + d.getValue() + ", path id: " + path.getIndex());
-                
-                for (Edge e : path.getEdges()) //solution without disaggregation
-                    e.setLoad(e.getCurrentLoad() + d.getValue());
+                //check solution for random combination
+                int realizedDemandPart = 0;
+                if (combination.size() == 1)
+                {
+                    PathWithEgdes path = getPathWithID(mapCopy.get(d), combination.get(0)); //combination.get(): correct range [0;3] 
+                    System.out.println("Demand: " + d.getValue() + ", path id: " + path.getIndex());
+                    System.out.println("p: " + path.toString());
+                    for (Edge e : path.getEdges()) //solution without disaggregation
+                        e.setLoad(e.getCurrentLoad() + d.getValue());
+                    path.setMinFreeLoad(); //refresh
+                }
+                if (combination.size() == 2)
+                {
+                    PathWithEgdes path1 = getPathWithID(mapCopy.get(d), combination.get(0));
+                    PathWithEgdes path2 = getPathWithID(mapCopy.get(d), combination.get(1));
+                    
+                    System.out.println("DEZAGREGUJ NA 2");
+                    System.out.println("Demand: " + d.getValue());
+                    System.out.println("p1: " + path1.toString());
+                    System.out.println("p2: " + path2.toString());
+                }
+                */
+                int demandToRealize = d.getValue();
+                while (demandToRealize > 0)
+                {
+                    int idx = rand.nextInt(Config.PATHS-1)+1; //range[0,3] -> [1,4]
+                    PathWithEgdes path = getPathWithID(mapCopy.get(d), idx);
+
+                    int free = path.getMinFreeLoad();
+                    System.out.println("path: " + path.getIndex() + ", free: " + free);
+
+                    if (free >= demandToRealize)
+                    {
+                        for (Edge e : path.getEdges())
+                            e.setLoad(e.getCurrentLoad() + demandToRealize);
+                        demandToRealize = 0;
+                    }
+                    
+                    if (free < demandToRealize)
+                    {
+                        if (free == 0 && demandToRealize >= Config.MODULARITY)
+                        {
+                            for (Edge e : path.getEdges())
+                                    e.setLoad(e.getCurrentLoad() + Config.MODULARITY);
+                            demandToRealize -= Config.MODULARITY;
+                        }
+                        else if (free == 0 && demandToRealize < Config.MODULARITY)
+                        {
+                            for (Edge e : path.getEdges())
+                                e.setLoad(e.getCurrentLoad() + demandToRealize);
+                            demandToRealize = 0;
+                        }
+                        else if (free != 0 && demandToRealize >= Config.MODULARITY)
+                        {
+                            //...
+                        }
+                        else if (free != 0 && demandToRealize < Config.MODULARITY)
+                        {
+                            //...
+                        }
+                        
+
+                    }
+                    path.setMinFreeLoad(); //refresh
+                    System.out.println("Demand: " + d.getValue() + ", path id: " + path.getIndex());
+                }
                 
             }
             temperature = temperature * coolingRate;
@@ -114,6 +185,7 @@ public class SimulatedAnnealing {
         {
             pathsConfigs.add(new PathsConfiguration(map, d, maxDisaggregation));
         }
+        
         //test
         for (PathsConfiguration p : pathsConfigs)
         {
@@ -123,7 +195,17 @@ public class SimulatedAnnealing {
                 System.out.print(list.toString() +  ", ");
             System.out.println();
         }
-    } 
+    }
+    
+    public PathWithEgdes getPathWithID(List<PathWithEgdes> paths, int id)
+    {
+        for (PathWithEgdes path : paths)
+        {
+            if (path.getIndex() == id)
+                return path;
+        }
+        return null;
+    }
     
     
 }

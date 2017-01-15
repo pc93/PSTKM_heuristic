@@ -41,6 +41,10 @@ public class PathWithEgdes {
             }
             return minFree;
         }
+        public int getMinFreeLoad()
+        {
+            return setMinFreeLoad(); 
+        }
 
 	@Override
 	public String toString() {

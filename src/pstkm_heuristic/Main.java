@@ -30,7 +30,7 @@ public class Main {
         
         System.out.println("Network modules: " + input.getNetworkModules());
         
-        SimulatedAnnealing sa = new SimulatedAnnealing(input, 1024, 0.99, 0.5);
+        SimulatedAnnealing sa = new SimulatedAnnealing(input, 1000, 0.1, 0.97);
         sa.findSolution();
         //model.createModel(input, numberOfPaths);
     }

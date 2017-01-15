@@ -10,169 +10,151 @@ import java.util.List;
 import java.util.Random;
 import java.util.Map;
 import java.util.stream.IntStream;
+
 import pl.edu.pojo.*;
 
 public class SimulatedAnnealing {
-    
-    private HeuristicInput input;
-    private Map<Demand, List<PathWithEgdes>> map;
-    private List<PathsConfiguration> pathsConfigs;
-    
-    private double temperature;
-    private double stopTemp;
-    private double coolingRate;
-    
-    private Random rand = new Random();
-    
-    public SimulatedAnnealing(HeuristicInput input, double startTemp, double stopTemp, double coolingRate)
-    {
-        this.input = input;
-        this.map = input.getDemandPathsMap();
-        this.temperature = startTemp;
-        this.stopTemp = stopTemp;
-        this.coolingRate = coolingRate;
-        this.pathsConfigs = new ArrayList<PathsConfiguration>();
-        
-        getPathConfigurations(2);
-    }
-    
-    public void findSolution()
-    {
-        System.out.println("\nInit state: " + input.getNetworkModules());
-        
-        HeuristicInput inputCopy = Parser.parse("resources/non-trivial_1.txt", "resources/demands_nontrivial1.txt", Config.PATHS);
-        Map<Demand, List<PathWithEgdes>> mapCopy = inputCopy.getDemandPathsMap();
-        System.out.println("Init modules: " + input.getNetworkModules());
-        int bestSolution = 1000;
-        double deltaDistance = 0;
-        
 
-        //Simulated Annealing solution
-        int iterations = 0;
-        List<Demand> demandsRealized = new ArrayList<Demand>();
-        while (temperature > stopTemp)
-        {
-            inputCopy = Parser.parse("resources/non-trivial_1.txt", "resources/demands_nontrivial1.txt", Config.PATHS); //code it to not do it like that but like below
-            //inputCopy = new HeuristicInput(input.getEdges(), input.getDemandPathsMap()); //inputCopy should be a network before demands were realized, but each iteration increase it
-            System.out.println(inputCopy.getNetworkModules());
-            mapCopy = inputCopy.getDemandPathsMap();
-            
-            for (Demand d : mapCopy.keySet())
-            {
-                    int demandToRealize = d.getValue();
-                    while (demandToRealize > 0)
-                    {
-                        int idx = rand.nextInt(Config.PATHS-1)+1; //range[0,3] -> [1,4]
-                        PathWithEgdes path = getPathWithID(mapCopy.get(d), idx);
+	private HeuristicInput input;
+	private Map<Demand, List<PathWithEgdes>> map;
 
-                        int free = path.getMinFreeLoad();
-                        System.out.println("Demand: " + d.getValue() + ", path id: " + path.getIndex() 
-                                + ", free: " + free + ", toRealize: " + demandToRealize);
+	private double temperature;
+	private double stopTemp;
+	private double coolingRate;
 
-                        if (free >= demandToRealize)
-                        {
-                            for (Edge e : path.getEdges())
-                                e.setLoad(e.getCurrentLoad() + demandToRealize);
-                            demandToRealize = 0;
-                        }
+	private Random rand = new Random();
 
-                        if (free < demandToRealize)
-                        {
-                            if (free == 0 && demandToRealize >= Config.MODULARITY)
-                            {
-                                for (Edge e : path.getEdges())
-                                        e.setLoad(e.getCurrentLoad() + Config.MODULARITY);
-                                demandToRealize -= Config.MODULARITY;
-                            }
-                            else if (free == 0 && demandToRealize < Config.MODULARITY)
-                            {
-                                for (Edge e : path.getEdges())
-                                    e.setLoad(e.getCurrentLoad() + demandToRealize);
-                                demandToRealize = 0;
-                            }
-                            else //(free != 0)
-                            {
-                                for (Edge e : path.getEdges())
-                                    e.setLoad(e.getCurrentLoad() + free);
-                                demandToRealize -= free;
-                            }
-                        }
-                        path.setMinFreeLoad(); //refresh    
-                    } 
-               
-            }
+	public SimulatedAnnealing(HeuristicInput input, double startTemp,
+			double stopTemp, double coolingRate) {
+		this.input = input;
+		this.map = input.getDemandPathsMap();
+		this.temperature = startTemp;
+		this.stopTemp = stopTemp;
+		this.coolingRate = coolingRate;
+	}
 
-            temperature = temperature * coolingRate;
-            iterations += 1;
-            
-            System.out.println(iterations + ": Random local solution: " + inputCopy.getNetworkModules() + "\n");
-            if (inputCopy.getNetworkModules() < bestSolution)
-                bestSolution = inputCopy.getNetworkModules();
-        }
-        System.out.println("\niterations: " + iterations);
-        System.out.println("Best solution: " + bestSolution);
-        
-    }
-    
-    
-    public int  getGreedySolution(HeuristicInput input)
-    {
-        Map<Demand, List<PathWithEgdes>> map = input.getDemandPathsMap();
-        for (Demand d : map.keySet())
-        {
-            //get shortest path for demand
-            PathWithEgdes shortest = null;
-            int min = 1000;
-            for (PathWithEgdes path : map.get(d))
-            {
-                if (min >= path.getEdges().size())
-                {
-                    min = path.getEdges().size();
-                    shortest = path;
-                }
-            }
-            for (Edge e : shortest.getEdges())
-                e.setLoad(e.getCurrentLoad() + d.getValue());
-        }
-        return input.getNetworkModules();
-    }
-    
-    public void getPathConfigurations(int maxDisaggregation)
-    {
-        for (Demand d : map.keySet())
-        {
-            pathsConfigs.add(new PathsConfiguration(map, d, maxDisaggregation));
-        }
-        
-        //test
-        for (PathsConfiguration p : pathsConfigs)
-        {
-            System.out.println("Demand " + p.getDemand().getId() + ": Combinations of paths' indexes:");
-            List<List<Integer>> listOfList = p.getDemandPathsCombinations();
-            for (List<Integer> list : listOfList)
-                System.out.print(list.toString() +  ", ");
-            System.out.println();
-        }
-    }
-    
-    public PathWithEgdes getPathWithID(List<PathWithEgdes> paths, int id)
-    {
-        for (PathWithEgdes path : paths)
-        {
-            if (path.getIndex() == id)
-                return path;
-        }
-        return null;
-    }
-    
-    public Demand getDemandWithID(List<Demand> demands, int id)
-    {
-        for (Demand d : demands)
-        {
-            if (d.getId() == id)
-                return d;
-        }
-        return null;
-    }
-    
+	public void findSolution() {
+		
+		System.out.println("Init modules: " + input.getNetworkModules());
+		int bestSolution = 1000;
+		int deltaDistance = 0;
+		int distance = getGreedySolution(input);
+
+		// Simulated Annealing solution
+		int iterations = 0;
+		Result result = null;
+		while (temperature > stopTemp) {
+			input = Parser.parse("resources/non-trivial_1.txt", "resources/demands_nontrivial1.txt", Config.PATHS);
+			result = new Result(input.getNetworkModules());
+			Map<Demand, List<PathWithEgdes>> mapCopy = input
+					.getDemandPathsMap();
+			List<Demand> demands = new ArrayList<Demand>(mapCopy.keySet());
+
+			for (int i = 0; i < mapCopy.size(); i++) {
+				Demand d = demands.get(rand.nextInt(demands.size()));
+				int demandToRealize = d.getValue();
+				while (demandToRealize > 0) {
+					List<PathWithEgdes> paths = mapCopy.get(d);
+					int idx = rand.nextInt(paths.size());
+					PathWithEgdes path = paths.get(idx);
+
+					int realizedDemand = realizeDemand(d, demandToRealize, path);
+					result.update(d, path, realizedDemand);
+					demandToRealize = demandToRealize - realizedDemand;
+					System.out.println("Realized demand: " + realizedDemand);
+					System.out.println("Demand to realize: " + demandToRealize);
+				}
+				demands.remove(demands.indexOf(d));
+			}
+			int tempResult = input.getNetworkModules();
+			System.out.println(iterations + ": Random local solution: "
+					+ tempResult + "\n");
+
+			deltaDistance = tempResult - distance;
+			if ((deltaDistance < 0)
+					|| (distance > 0 && Math.exp(-deltaDistance / temperature) > rand
+							.nextDouble())) {
+				bestSolution = tempResult;
+				distance = deltaDistance + distance;
+			}
+			result.updateFinalModules(bestSolution);
+			temperature = temperature * coolingRate;
+			iterations++;
+
+		}
+		System.out.println("\nNumber of iterations: " + iterations);
+		System.out.println("Best solution: " + bestSolution);
+		result.printResult();
+
+	}
+
+	private int realizeDemand(Demand d, int demandToRealize, PathWithEgdes path) {
+
+		int free = path.getMinFreeLoad();
+		System.out.println("Demand: " + d.getValue() + ", path id: "
+				+ path.getIndex() + ", free: " + free + ", toRealize: "
+				+ demandToRealize);
+		int demandRealized = 0;
+
+		if (free >= demandToRealize) {
+			for (Edge e : path.getEdges())
+				e.setLoad(e.getCurrentLoad() + demandToRealize);
+			demandRealized = demandToRealize;
+		}
+
+		if (free < demandToRealize) {
+			if (free == 0 && demandToRealize >= Config.MODULARITY) {
+				for (Edge e : path.getEdges())
+					e.setLoad(e.getCurrentLoad() + Config.MODULARITY);
+				demandRealized = Config.MODULARITY;
+			} else if (free == 0 && demandToRealize < Config.MODULARITY) {
+				for (Edge e : path.getEdges())
+					e.setLoad(e.getCurrentLoad() + demandToRealize);
+				demandRealized = demandToRealize;
+			} else // (free != 0)
+			{
+				for (Edge e : path.getEdges())
+					e.setLoad(e.getCurrentLoad() + free);
+				demandRealized = free;
+			}
+		}
+
+		return demandRealized;
+	}
+
+	public PathWithEgdes getPathWithID(List<PathWithEgdes> paths, int id) {
+		for (PathWithEgdes path : paths) {
+			if (path.getIndex() == id)
+				return path;
+		}
+		return null;
+	}
+
+	public Demand getDemandWithID(List<Demand> demands, int id) {
+		for (Demand d : demands) {
+			if (d.getId() == id)
+				return d;
+		}
+		return null;
+	}
+
+	public int getGreedySolution(HeuristicInput input) {
+		Map<Demand, List<PathWithEgdes>> map = input.getDemandPathsMap();
+		for (Demand d : map.keySet()) {
+			// get shortest path for demand
+			PathWithEgdes shortest = null;
+			int min = 1000;
+			for (PathWithEgdes path : map.get(d)) {
+				if (min >= path.getEdges().size()) {
+					min = path.getEdges().size();
+					shortest = path;
+				}
+			}
+			for (Edge e : shortest.getEdges())
+				e.setLoad(e.getCurrentLoad() + d.getValue());
+		}
+
+		return input.getNetworkModules();
+	}
+
 }

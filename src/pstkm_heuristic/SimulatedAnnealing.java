@@ -5,6 +5,7 @@
  */
 package pstkm_heuristic;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Map;
@@ -15,7 +16,7 @@ public class SimulatedAnnealing {
     
     private HeuristicInput input;
     private Map<Demand, List<PathWithEgdes>> map;
-    private Map<Demand, List<List<Integer>>> pathsConfig;
+    private List<PathsConfiguration> pathsConfigs;
     
     private double temperature;
     private double stopTemp;
@@ -30,7 +31,9 @@ public class SimulatedAnnealing {
         this.temperature = startTemp;
         this.stopTemp = stopTemp;
         this.coolingRate = coolingRate;
+        this.pathsConfigs = new ArrayList<PathsConfiguration>();
         
+        getPathConfigurations(2);
     }
     
     public void findSolution()
@@ -105,20 +108,22 @@ public class SimulatedAnnealing {
         return input.getNetworkModules();
     }
     
-    public void PathConfigurations(int maxDisaggregation)
+    public void getPathConfigurations(int maxDisaggregation)
     {
-        if (maxDisaggregation > 0)
+        for (Demand d : map.keySet())
         {
-            for (Demand d : map.keySet())
-            {
-                int pathsCount = map.get(d).size();
-                int[] indexes = IntStream.range(1, pathsCount).toArray();
-                
-            }
+            pathsConfigs.add(new PathsConfiguration(map, d, maxDisaggregation));
         }
-        
-    }
-            
+        //test
+        for (PathsConfiguration p : pathsConfigs)
+        {
+            System.out.println("Demand " + p.getDemand().getId() + ": Combinations of paths' indexes:");
+            List<List<Integer>> listOfList = p.getDemandPathsCombinations();
+            for (List<Integer> list : listOfList)
+                System.out.print(list.toString() +  ", ");
+            System.out.println();
+        }
+    } 
     
     
 }

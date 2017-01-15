@@ -14,25 +14,28 @@ import java.util.Map;
  * @author Czarnocki
  */
 public class PathsConfiguration {
-    private List<List<Integer>> demandPaths;
+    private List<List<Integer>> demandPathsCombinations;
     private Demand demand;
-    Map<Demand, List<PathWithEgdes>> demandPathsMap;
+    private List<PathWithEgdes> demandPaths;
+    private Map<Demand, List<PathWithEgdes>> demandPathsMap;
     
     
     public PathsConfiguration(Map<Demand, List<PathWithEgdes>> demandPathsMap,
             Demand demand, int maxDisaggregation)
     {
         this.demand = demand;
-        this.demandPathsMap = demandPathsMap;        
+        this.demandPathsMap = demandPathsMap;
+        this.demandPaths = demandPathsMap.get(demand);
+        demandPathsCombinations = new ArrayList<List<Integer>>();
+        generateDisaggregationPaths(maxDisaggregation);
     }
     
     public void generateDisaggregationPaths(int maxDisaggregation)
     {
-        int pathsOfDemand = demandPathsMap.get(demand).size();
-        int[] pathsIndexes = new int[pathsOfDemand];
-        for (int i = 0; i < pathsOfDemand; i++) 
-            pathsIndexes[i] = demandPathsMap.get(demand).get(i+1).getIndex(); //array range [0, X-1], paths for demand range [1, X]
-        
+        int demandPathSize = demandPaths.size();
+        int[] pathsIndexes = new int[demandPathSize];
+        for (int i = 0; i < demandPathSize; i++)
+            pathsIndexes[i] = demandPaths.get(i).getIndex(); //get Path -> get its index
         int startIndex = 0;
         for (int d = 1; d <= maxDisaggregation; d++) //na ile sciezek mozemy dezagregowac zapotrzebowanie
         {
@@ -46,16 +49,16 @@ public class PathsConfiguration {
                     startIndex += 1;
                     ints = permGen(new ArrayList<Integer>(), pathsIndexes, d, startIndex);
                 }
-                demandPaths.add(ints);
-                System.out.print("\ncombi size: " + demandPaths.size());
+                demandPathsCombinations.add(ints);
+                System.out.print("\ncombi size: " + demandPathsCombinations.size());
                 System.out.print(" recently element added: " + ints.toString() + "\n\n");
                 
             }
             startIndex = 0;
         }
         
-        for(List<Integer> generated : demandPaths)
-            System.out.println(generated.toString());
+        //for(List<Integer> generated : demandPathsCombinations)
+        //    System.out.println(generated.toString());
     }
     
     
@@ -80,7 +83,7 @@ public class PathsConfiguration {
             }
             else
             {
-                if (!demandPaths.contains(temp))
+                if (!demandPathsCombinations.contains(temp))
                 {
                     System.out.println("   -> return: " + temp.toString());
                     return temp;
@@ -96,6 +99,15 @@ public class PathsConfiguration {
         }
         
         return curr;
+    }
+    
+    public List<List<Integer>> getDemandPathsCombinations()
+    {
+        return demandPathsCombinations;
+    }
+    public Demand getDemand()
+    {
+        return demand;
     }
     
     public static long Newton(int n, int k)

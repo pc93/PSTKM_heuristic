@@ -45,12 +45,13 @@ public class Result {
 	}
 	
 	public void printResult() {
+		
+		System.out.println(result.toString());
 		System.out.println("\n******* Final results ******* ");
 		System.out.println("Initial modules: " + initModules);
 		System.out.println("Final modules:  " + finalModules);
 		int ss = 2*(finalModules - initModules);
 		System.out.println("Site-Surveys needed: " + ss);
-		System.out.println(result.toString());
 	}
 
 }

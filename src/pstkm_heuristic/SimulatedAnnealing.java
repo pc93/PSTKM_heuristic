@@ -40,6 +40,7 @@ public class SimulatedAnnealing {
 		int deltaDistance = 0;
 		int distance = getGreedySolution(input);
 
+		int greedy = distance;
 		// Simulated Annealing solution
 		int iterations = 0;
 		Result result = null;
@@ -85,6 +86,7 @@ public class SimulatedAnnealing {
 		System.out.println("\nNumber of iterations: " + iterations);
 		System.out.println("Best solution: " + bestSolution);
 		result.printResult();
+		System.out.println("Greedy: " + greedy);
 
 	}
 
@@ -139,20 +141,41 @@ public class SimulatedAnnealing {
 	}
 
 	public int getGreedySolution(HeuristicInput input) {
-		Map<Demand, List<PathWithEgdes>> map = input.getDemandPathsMap();
-		for (Demand d : map.keySet()) {
-			// get shortest path for demand
-			PathWithEgdes shortest = null;
-			int min = 1000;
-			for (PathWithEgdes path : map.get(d)) {
-				if (min >= path.getEdges().size()) {
-					min = path.getEdges().size();
-					shortest = path;
-				}
+		
+		Map<Demand, List<PathWithEgdes>> mapCopy = input
+				.getDemandPathsMap();
+		List<Demand> demands = new ArrayList<Demand>(mapCopy.keySet());
+
+		for (int i = 0; i < mapCopy.size(); i++) {
+			Demand d = demands.get(rand.nextInt(demands.size()));
+			int demandToRealize = d.getValue();
+			while (demandToRealize > 0) {
+				List<PathWithEgdes> paths = mapCopy.get(d);
+				int idx = rand.nextInt(paths.size());
+				PathWithEgdes path = paths.get(idx);
+
+				int realizedDemand = realizeDemand(d, demandToRealize, path);
+				demandToRealize = demandToRealize - realizedDemand;
+				System.out.println("Realized demand: " + realizedDemand);
+				System.out.println("Demand to realize: " + demandToRealize);
 			}
-			for (Edge e : shortest.getEdges())
-				e.setLoad(e.getCurrentLoad() + d.getValue());
+			demands.remove(demands.indexOf(d));
 		}
+		
+//		Map<Demand, List<PathWithEgdes>> map = input.getDemandPathsMap();
+//		for (Demand d : map.keySet()) {
+//			// get shortest path for demand
+//			PathWithEgdes shortest = null;
+//			int min = 1000;
+//			for (PathWithEgdes path : map.get(d)) {
+//				if (min >= path.getEdges().size()) {
+//					min = path.getEdges().size();
+//					shortest = path;
+//				}
+//			}
+//			for (Edge e : shortest.getEdges())
+//				e.setLoad(e.getCurrentLoad() + d.getValue());
+//		}
 
 		return input.getNetworkModules();
 	}
